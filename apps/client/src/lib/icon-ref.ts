@@ -180,7 +180,7 @@ export function serializeIconRef(ref: IconRef): string {
 // tones, keycaps); 16 UTF-16 units covers all of them and rejects free text.
 const MAX_EMOJI_LENGTH = 16;
 const EMOJI_PATTERN =
-  /^(?=.*[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3])[\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Component}\u200d\ufe0f\u20e3]+$/u;
+  /^(?=.*(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3))[\p{Extended_Pictographic}\p{Emoji_Component}]+$/u;
 
 /**
  * Return the stored value when it is a native emoji (the original Docmost

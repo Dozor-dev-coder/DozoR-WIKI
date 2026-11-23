@@ -12,7 +12,7 @@ import { Transform, TransformFnParams } from 'class-transformer';
 // emoji grapheme (needs at least one pictographic code point, so plain text
 // such as `123` or `#` is still rejected).
 const SPACE_ICON_PATTERN =
-  /^(?:[a-z][a-z0-9-]*|(?=.*[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3])[\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Component}\u200d\ufe0f\u20e3]{1,16})$/u;
+  /^(?:[a-z][a-z0-9-]*|(?=.*(?:\p{Extended_Pictographic}|\p{Regional_Indicator}|\u20e3))[\p{Extended_Pictographic}\p{Emoji_Component}]{1,16})$/u;
 
 export class CreateSpaceDto {
   @IsOptional()
