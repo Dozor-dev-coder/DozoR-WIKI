@@ -12,12 +12,20 @@ describe("PageIcon", () => {
     ).not.toBeNull();
   });
 
-  it("renders the default file glyph for a legacy emoji value (never raw)", () => {
-    const { container } = render(<PageIcon value="🚀" />);
+  it("renders a native emoji value as the emoji itself", () => {
+    const { container } = render(<PageIcon value="🇺🇦" />);
+    expect(container.textContent).toBe("🇺🇦");
+    expect(
+      container.querySelector(".tabler-icon-file-description"),
+    ).toBeNull();
+  });
+
+  it("renders the default file glyph for free text (never raw)", () => {
+    const { container } = render(<PageIcon value="hello" />);
     expect(
       container.querySelector(".tabler-icon-file-description"),
     ).not.toBeNull();
-    expect(container.textContent ?? "").not.toContain("🚀");
+    expect(container.textContent ?? "").not.toContain("hello");
   });
 
   it("renders the default file glyph for malformed JSON", () => {

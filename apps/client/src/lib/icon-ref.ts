@@ -175,3 +175,22 @@ export function serializeIconRef(ref: IconRef): string {
   if (ref.color) out.color = ref.color;
   return JSON.stringify(out);
 }
+
+// One emoji grapheme can be several code points (ZWJ families, flags, skin
+// tones, keycaps); 16 UTF-16 units covers all of them and rejects free text.
+const MAX_EMOJI_LENGTH = 16;
+const EMOJI_PATTERN =
+  /^(?=.*[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3])[\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Component}\u200d\ufe0f\u20e3]+$/u;
+
+/**
+ * Return the stored value when it is a native emoji (the original Docmost
+ * format, still written by the emoji tab of the icon pickers), else `null`.
+ * Text that merely contains digits or `#` is rejected: at least one pictographic
+ * code point is required.
+ */
+export function parseEmojiIcon(raw: string | null | undefined): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed || trimmed.length > MAX_EMOJI_LENGTH) return null;
+  return EMOJI_PATTERN.test(trimmed) ? trimmed : null;
+}

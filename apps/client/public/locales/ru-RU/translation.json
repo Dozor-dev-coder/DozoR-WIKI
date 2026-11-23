@@ -786,6 +786,8 @@
   "Action": "Действие",
   "{{ssoProviderType}} configuration": "Конфигурация {{ssoProviderType}}",
   "Icon": "Иконка",
+  "Icons": "Иконки",
+  "Or pick an emoji": "Или выберите эмодзи",
   "Upload image": "Загрузить изображение",
   "Remove image": "Удалить изображение",
   "Failed to remove image": "Не удалось удалить изображение",

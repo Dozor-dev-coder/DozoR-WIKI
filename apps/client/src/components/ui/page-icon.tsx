@@ -1,17 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import {
   ActionIcon,
   Button,
   Group,
   Popover,
+  SegmentedControl,
   Text,
   Tooltip,
   UnstyledButton,
+  useComputedColorScheme,
 } from "@mantine/core";
 import { useDisclosure, useClickOutside } from "@mantine/hooks";
 import { IconFileDescription } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
 import {
+  parseEmojiIcon,
   parseIconRef,
   serializeIconRef,
   resolvePageIconColor,
@@ -22,6 +25,7 @@ import {
   type PageIconColor,
 } from "@/lib/icon-ref";
 import { LucideGlyph, isValidIconName } from "./lucide/lucide-glyph";
+import { Picker as EmojiMartPicker } from "./emoji-picker";
 import { LucideIconGrid } from "./lucide/lucide-icon-grid";
 import classes from "./page-icon.module.css";
 
@@ -36,18 +40,32 @@ import classes from "./page-icon.module.css";
 const MAX_BOX = 24;
 
 export interface PageIconProps {
-  /** The stored `pages.icon` value (IconRef JSON, a legacy emoji, or null). */
+  /** The stored `pages.icon` value (IconRef JSON, a native emoji, or null). */
   value: string | null | undefined;
   size?: number;
 }
 
 /**
- * Renders a page icon from its stored value. A valid IconRef renders as a Lucide
- * glyph inside a rounded palette-colored box; anything else (null, a legacy
- * emoji, malformed JSON) falls back to the neutral file glyph. Never renders a
- * raw stored value.
+ * Renders a page icon from its stored value. A native emoji renders as itself;
+ * a valid IconRef renders as a Lucide glyph inside a rounded palette-colored
+ * box; anything else (null, malformed JSON, free text) falls back to the
+ * neutral file glyph. Never renders an arbitrary raw stored value.
  */
 export function PageIcon({ value, size = 18 }: PageIconProps) {
+  const emoji = parseEmojiIcon(value);
+  if (emoji) {
+    const box = Math.min(size, MAX_BOX);
+    return (
+      <span
+        aria-hidden="true"
+        className={classes.emoji}
+        style={{ width: box, height: box, fontSize: Math.round(box * 0.85) }}
+      >
+        {emoji}
+      </span>
+    );
+  }
+
   const ref = parseIconRef(value);
 
   if (!ref || !isValidIconName(ref.name)) {
@@ -94,8 +112,8 @@ export function PageIcon({ value, size = 18 }: PageIconProps) {
 
 export interface PageIconPickerProps {
   value: string | null | undefined;
-  /** Called with the serialized IconRef JSON when an icon is picked. */
-  onChange: (json: string) => void;
+  /** Called with the stored value: a native emoji or a serialized IconRef JSON. */
+  onChange: (value: string) => void;
   onRemove: () => void;
   readOnly?: boolean;
   /** Size of the trigger icon; falls back to {@link PageIcon}'s own default. */
@@ -109,10 +127,10 @@ export interface PageIconPickerProps {
 
 /**
  * The article-icon picker: a Popover whose trigger is the current {@link PageIcon}
- * and whose dropdown lazily renders the color palette + the Lucide icon grid +
- * Remove. On pick it serializes `{name,color}` and calls `onChange` with the
- * JSON string. Open/close/Escape/click-outside behavior mirrors the emoji
- * picker (`components/ui/emoji-picker.tsx`).
+ * and whose dropdown lazily renders two tabs — the emoji-mart emoji picker
+ * (stores the native emoji) and the color palette + Lucide icon grid (stores
+ * `{name,color}` JSON) — plus Remove. Open/close/Escape/click-outside behavior
+ * mirrors the emoji picker (`components/ui/emoji-picker.tsx`).
  */
 export function PageIconPicker({
   value,
@@ -128,6 +146,15 @@ export function PageIconPicker({
   const [dropdown, setDropdown] = useState<HTMLDivElement | null>(null);
 
   const parsed = useMemo(() => parseIconRef(value), [value]);
+  const colorScheme = useComputedColorScheme("light");
+  const [tab, setTab] = useState<"emoji" | "icons">(
+    parsed ? "icons" : "emoji",
+  );
+
+  // Open on the tab matching the current icon kind.
+  useEffect(() => {
+    if (opened) setTab(parsed ? "icons" : "emoji");
+  }, [opened, parsed]);
   const [color, setColor] = useState<PageIconColor>(
     resolvePageIconColor(parsed?.color),
   );
@@ -171,6 +198,12 @@ export function PageIconPicker({
     handlers.close();
   };
 
+  const handlePickEmoji = (emoji: { native?: string }) => {
+    if (!emoji.native) return;
+    onChange(emoji.native);
+    handlers.close();
+  };
+
   const handlePickColor = (next: PageIconColor) => {
     setColor(next);
     // If there is already a valid icon, recolor it immediately.
@@ -188,7 +221,7 @@ export function PageIconPicker({
     <Popover
       opened={opened}
       onClose={handlers.close}
-      width={332}
+      width={356}
       position="bottom-start"
       disabled={readOnly}
       closeOnEscape
@@ -209,32 +242,57 @@ export function PageIconPicker({
       <Popover.Dropdown ref={setDropdown} p="sm">
         {opened && (
           <>
-            <Text size="xs" c="dimmed" mb={4}>
-              {t("Color")}
-            </Text>
-            <Group gap={6} mb="sm">
-              {PAGE_ICON_PALETTE.map((token) => (
-                <Tooltip key={token} label={token} openDelay={400} withArrow>
-                  <UnstyledButton
-                    type="button"
-                    aria-label={token}
-                    aria-pressed={token === color}
-                    onClick={() => handlePickColor(token)}
-                    style={{
-                      width: 18,
-                      height: 18,
-                      borderRadius: "50%",
-                      backgroundColor: pageIconBg(token),
-                      border:
-                        token === color
-                          ? "2px solid var(--mantine-color-default-color)"
-                          : "2px solid transparent",
-                    }}
-                  />
-                </Tooltip>
-              ))}
-            </Group>
-            <LucideIconGrid onPick={handlePick} />
+            <SegmentedControl
+              fullWidth
+              size="xs"
+              mb="sm"
+              value={tab}
+              onChange={(next) => setTab(next as "emoji" | "icons")}
+              data={[
+                { value: "emoji", label: t("Emoji") },
+                { value: "icons", label: t("Icons") },
+              ]}
+            />
+            {tab === "emoji" ? (
+              <Suspense fallback={null}>
+                <EmojiMartPicker
+                  onEmojiSelect={handlePickEmoji}
+                  perLine={8}
+                  skinTonePosition="search"
+                  theme={colorScheme}
+                  autoFocus={false}
+                />
+              </Suspense>
+            ) : (
+              <>
+                <Text size="xs" c="dimmed" mb={4}>
+                  {t("Color")}
+                </Text>
+                <Group gap={6} mb="sm">
+                  {PAGE_ICON_PALETTE.map((token) => (
+                    <Tooltip key={token} label={token} openDelay={400} withArrow>
+                      <UnstyledButton
+                        type="button"
+                        aria-label={token}
+                        aria-pressed={token === color}
+                        onClick={() => handlePickColor(token)}
+                        style={{
+                          width: 18,
+                          height: 18,
+                          borderRadius: "50%",
+                          backgroundColor: pageIconBg(token),
+                          border:
+                            token === color
+                              ? "2px solid var(--mantine-color-default-color)"
+                              : "2px solid transparent",
+                        }}
+                      />
+                    </Tooltip>
+                  ))}
+                </Group>
+                <LucideIconGrid onPick={handlePick} />
+              </>
+            )}
             <Group justify="flex-end" mt="xs">
               <Button variant="default" c="gray" size="xs" onClick={handleRemove}>
                 {t("Remove")}
