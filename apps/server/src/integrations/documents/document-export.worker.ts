@@ -10,6 +10,7 @@ import {
   TextRun,
   WidthType,
 } from 'docx';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 import PDFDocument = require('pdfkit');
 import { loadFontBuffer } from '../ai/rasterize/rasterize.assets';
 
