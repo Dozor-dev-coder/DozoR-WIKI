@@ -35,7 +35,7 @@ function makeCollabEditor(): Editor {
     element: document.createElement("div"),
     extensions: [
       StarterKit.configure({ undoRedo: false }),
-      ...collabExtensions(provider as any, { name: "Tester" } as any),
+      ...collabExtensions(provider as any, { id: "user-1", name: "Tester" } as any),
     ],
   });
   editors.push(editor);
