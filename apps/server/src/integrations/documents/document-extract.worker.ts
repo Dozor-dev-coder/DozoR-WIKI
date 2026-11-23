@@ -83,7 +83,7 @@ async function extract(): Promise<string> {
     }
   }
 
-  result = result.replace(/\u0000/g, '').trim();
+  result = result.replaceAll('\u0000', '').trim();
   if (purpose === 'search') return result.slice(0, MAX_INDEX_CHARACTERS);
   if (!result) {
     throw new Error(

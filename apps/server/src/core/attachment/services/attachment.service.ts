@@ -263,7 +263,7 @@ export class AttachmentService {
         } else {
           text = buffer
             .toString('utf8')
-            .replace(/\u0000/g, '')
+            .replaceAll('\u0000', '')
             .slice(0, 100_000);
         }
       }
