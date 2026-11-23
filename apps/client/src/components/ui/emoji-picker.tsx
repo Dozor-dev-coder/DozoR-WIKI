@@ -13,7 +13,7 @@ import { useTranslation } from "react-i18next";
 // resolution, then bind the data into the component. React.lazy only finishes
 // suspending once both are in memory, so the Suspense boundary hides the
 // Remove button until the Picker can render with real content.
-const Picker = React.lazy(async () => {
+export const Picker = React.lazy(async () => {
   const [pickerModule, dataModule] = await Promise.all([
     import("@slidoapp/emoji-mart-react"),
     import("@slidoapp/emoji-mart-data"),
@@ -127,6 +127,7 @@ function EmojiPicker({
     >
       <Popover.Target ref={setTarget}>
         <ActionIcon
+          type="button"
           c={actionIconProps?.c || "gray"}
           variant={actionIconProps?.variant || "transparent"}
           size={actionIconProps?.size}

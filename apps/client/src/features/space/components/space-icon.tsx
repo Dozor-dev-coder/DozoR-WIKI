@@ -4,6 +4,7 @@ import { CustomAvatar } from "@/components/ui/custom-avatar";
 import { AvatarIconType } from "@/features/attachments/types/attachment.types";
 import type { ISpaceSettings } from "../types/space.types";
 import { SPACE_ICONS } from "./space-icon-options";
+import { parseEmojiIcon } from "@/lib/icon-ref";
 
 interface Props {
   space: { name: string; logo?: string | null; settings?: ISpaceSettings };
@@ -47,6 +48,25 @@ export function SpaceIcon({ space, size = 28, mt, compact }: Props) {
     color: customized ? color : "currentColor",
     background: compact ? undefined : `${color}15`,
   };
+  const emoji = parseEmojiIcon(appearance?.icon);
+  if (emoji) {
+    return (
+      <span
+        style={{
+          ...style,
+          lineHeight: 1,
+          fontSize:
+            typeof dimension === "number"
+              ? Math.round(dimension * (compact ? 0.85 : 0.6))
+              : undefined,
+        }}
+        aria-hidden="true"
+        data-space-icon="emoji"
+      >
+        {emoji}
+      </span>
+    );
+  }
   return (
     <span
       style={style}

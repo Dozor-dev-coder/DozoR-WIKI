@@ -8,7 +8,10 @@ import {
   Text,
   Tooltip,
 } from "@mantine/core";
+import { IconMoodSmile } from "@tabler/icons-react";
 import { useTranslation } from "react-i18next";
+import EmojiPicker from "@/components/ui/emoji-picker";
+import { parseEmojiIcon } from "@/lib/icon-ref";
 import { SpaceIcon } from "./space-icon";
 import { SPACE_ICONS, SPACE_ICON_COLORS } from "./space-icon-options";
 
@@ -74,6 +77,29 @@ export function SpaceAppearancePicker({
           </Tooltip>
         ))}
       </SimpleGrid>
+      <Group gap="xs">
+        <EmojiPicker
+          icon={
+            parseEmojiIcon(icon) ? (
+              <span style={{ fontSize: 22, lineHeight: 1 }}>{icon}</span>
+            ) : (
+              <IconMoodSmile size={22} stroke={1.8} />
+            )
+          }
+          onEmojiSelect={(emoji: { native?: string }) => {
+            if (emoji.native) onIconChange(emoji.native);
+          }}
+          removeEmojiAction={() => onIconChange("")}
+          readOnly={Boolean(readOnly)}
+          actionIconProps={{
+            size: "lg",
+            variant: parseEmojiIcon(icon) ? "light" : "subtle",
+          }}
+        />
+        <Text size="sm" c="dimmed">
+          {t("Or pick an emoji")}
+        </Text>
+      </Group>
       <ColorInput
         label={t("Icon color")}
         value={color}

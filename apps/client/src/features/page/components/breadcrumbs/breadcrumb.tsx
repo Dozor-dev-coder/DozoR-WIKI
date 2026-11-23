@@ -34,13 +34,13 @@ import { useTranslation } from "react-i18next";
 import { PageIcon } from "@/components/ui/page-icon.tsx";
 import { getSpaceUrl } from "@/lib/config";
 import { useGetSpaceBySlugQuery } from "@/features/space/queries/space-query";
-import { parseIconRef } from "@/lib/icon-ref.ts";
+import { parseEmojiIcon, parseIconRef } from "@/lib/icon-ref.ts";
 
 function getTitle(name: string, icon: string | null | undefined) {
-  // Render the Lucide glyph only when a valid IconRef is set (breadcrumb nodes
-  // without an icon stay text-only, as before); a legacy/invalid value shows no
-  // glyph rather than leaking raw JSON.
-  if (parseIconRef(icon)) {
+  // Render the icon only when a native emoji or a valid IconRef is set
+  // (breadcrumb nodes without an icon stay text-only, as before); an invalid
+  // value shows no glyph rather than leaking raw JSON.
+  if (parseEmojiIcon(icon) || parseIconRef(icon)) {
     return (
       <>
         <PageIcon value={icon} size={16} />

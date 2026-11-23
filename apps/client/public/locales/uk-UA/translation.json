@@ -723,6 +723,8 @@
   "Action": "Дія",
   "{{ssoProviderType}} configuration": "Конфігурація {{ssoProviderType}}",
   "Icon": "Значок",
+  "Icons": "Іконки",
+  "Or pick an emoji": "Або виберіть емодзі",
   "Upload image": "Завантажити зображення",
   "Remove image": "Видалити зображення",
   "Failed to remove image": "Не вдалося видалити зображення",

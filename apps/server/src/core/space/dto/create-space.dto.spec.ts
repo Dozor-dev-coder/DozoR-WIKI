@@ -17,12 +17,25 @@ describe('space appearance input', () => {
     ).toHaveLength(0);
   });
 
+  it.each(['🚀', '🇺🇦', '👨‍👩‍👧', '1️⃣'])(
+    'accepts a native emoji icon %s',
+    async (icon) => {
+      expect(
+        await validate(
+          plainToInstance(CreateSpaceDto, { name: 'Design', slug: 'design', icon }),
+        ),
+      ).toHaveLength(0);
+    },
+  );
+
   it.each([
     { iconColor: 'red' },
     { iconColor: '#123' },
     { iconColor: 'url(https://example.org)' },
     { icon: '<svg>' },
     { icon: 'a'.repeat(41) },
+    { icon: '123' },
+    { icon: '🚀 launch' },
     { icon: {} },
   ])('rejects invalid appearance %j', async (appearance) => {
     expect(

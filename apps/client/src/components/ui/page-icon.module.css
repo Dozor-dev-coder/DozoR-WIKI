@@ -12,3 +12,13 @@
   flex-shrink: 0;
   color: light-dark(var(--page-icon-fg-light), var(--page-icon-fg-dark));
 }
+
+/* A native-emoji page icon: same footprint as the tile, no background. */
+.emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 1;
+  user-select: none;
+}
